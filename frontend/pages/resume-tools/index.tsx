@@ -20,6 +20,11 @@ interface ResumeIssue {
   suggestion: string | null
 }
 
+interface AnalysisItem {
+  type: 'done' | 'warning';
+  text: string;
+}
+
 export default function Resume() {
   const router = useRouter()
   const [file, setFile] = useState<File | null>(null)
@@ -52,6 +57,29 @@ export default function Resume() {
       return () => clearTimeout(timer)
     }
   }, [isComplete])
+
+  const handleATSAnalysis = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/resume/eval-ats', {
+        jdText: jobDescription,
+        resumeText: extractedText,
+      });
+
+      if (response.data) {
+        setAtsScore(response.data.score);
+        setResumeIssues(
+          response.data.analysis.map((item: AnalysisItem) => ({
+            type: item.type === 'done' ? 'info' : 'warning',
+            message: item.text,
+            suggestion: null,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching ATS analysis:', error);
+      alert('Failed to fetch ATS analysis. Please try again.');
+    }
+  };
 
   const handleDragOver = (e: React.DragEvent) => {
     e.preventDefault()
@@ -139,6 +167,9 @@ export default function Resume() {
           setSkillsMatchPercentage(compareResponse.data.matchPercentage)
         }
       }
+      setIsProcessing(true);
+
+      await handleATSAnalysis();
 
       setIsComplete(true)
       
@@ -353,7 +384,7 @@ export default function Resume() {
                               style={{ width: `${skillsMatchPercentage}%` }}
                             />
                           </div>
-                          <div className="mt-4 text-right">
+                          <div className="mt-8 text-right">
                             <Button 
                               variant="secondary"
                               onClick={() => router.push('/career-guidance')}
