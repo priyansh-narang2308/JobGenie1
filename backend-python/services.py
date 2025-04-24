@@ -1,11 +1,9 @@
+import json
 from googletrans import Translator
 import google.generativeai as genai
-import json
 
-# Initialize Gemini model
 model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
 
-# System prompts
 SYSTEM_PROMPT = '''You are a highly skilled career guidance assistant. You only answer questions related to career advice, professional development, skills acquisition, job opportunities, or education. If a user asks about mathematics, logic puzzles, or any unrelated topics, you should politely explain that your expertise is focused on career guidance and hence the query is invalid and ask them to ask questions based on such. Also, suggest some actual courses and course-links related to the query, if it is valid.'''
 
 CAREER_PATH_PROMPT = """You are a career path expert. Generate a detailed career progression path for the specified career. The response MUST be valid JSON and follow this exact format:
@@ -37,27 +35,22 @@ CAREER_PATH_PROMPT = """You are a career path expert. Generate a detailed career
 }"""
 
 def translate_text(text, target_language="en"):
-    """Translate text to the target language"""
     translator = Translator()
     translation = translator.translate(text, dest=target_language)
     return translation.text
 
 def detect_language(text):
-    """Detect the language of the provided text"""
     translator = Translator()
     detection = translator.detect(text)
     return detection.lang
 
 def generate_ai_response(prompt):
-    """Generate a response using the Gemini AI model"""
     response = model.generate_content(prompt)
     response_text = response.text if hasattr(response, "text") else response.parts[0].text if hasattr(response, "parts") and response.parts else None
     return response_text
 
 def process_career_path_response(response_text):
-    """Process and extract JSON from the career path response"""
     try:
-        # Find the first { and last } to extract just the JSON part
         start = response_text.find('{')
         end = response_text.rfind('}') + 1
         if start != -1 and end != -1:
@@ -70,7 +63,6 @@ def process_career_path_response(response_text):
         return None
 
 def translate_career_path(career_path, target_language):
-    """Translate a career path object to the target language"""
     return {
         "skills": [translate_text(skill, target_language) for skill in career_path["skills"]],
         "nodes": [{
