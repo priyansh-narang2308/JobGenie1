@@ -65,12 +65,12 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         </div>
       </header>
       <div className="flex flex-1">
-        <aside
+      <aside
           className={cn(
-            "fixed inset-y-0 left-0 z-20 flex w-64 flex-col border-r bg-background transition-transform md:sticky md:translate-x-0",
-            sidebarOpen ? "translate-x-0" : "-translate-x-full",
+            "sticky top-0 z-20 flex h-screen w-64 flex-col border-r bg-background transition-transform md:translate-x-0",
+            sidebarOpen ? "translate-x-0 fixed" : "-translate-x-full fixed md:sticky",
           )}
-        >
+      >
           <div className="flex h-16 items-center border-b px-4">
             <div className="flex items-center gap-2">
               <Sparkles className="h-6 w-6 text-primary" />
