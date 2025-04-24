@@ -63,7 +63,7 @@ const CareerChatbot = () => {
 
         try {
             // Make API call to your backend
-            const response = await fetch("http://localhost:8000/career-chatbot", {
+            const response = await fetch("http://localhost:8000/api/career-guidance/chatbot", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
