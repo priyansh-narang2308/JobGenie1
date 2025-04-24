@@ -1,4 +1,6 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
+import os
+from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -13,10 +15,10 @@ from routers.career_chatbot import router as career_chatbot_router
 # Load environment variables
 load_dotenv()
 
-# Initialize FastAPI app
+from routes import career_guidance_routes
+
 app = FastAPI()
 
-# Configure CORS for local frontend development
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["http://localhost:3000"],  # Frontend URL
@@ -41,3 +43,4 @@ async def root():
     return {"message": "Welcome to JobGenie API"}
 
 # Job search endpoints
+app.include_router(career_guidance_routes.router)
