@@ -13,6 +13,8 @@ import {
   Menu,
   Globe,
   MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
   Settings,
   Sparkles,
   User,
@@ -20,29 +22,39 @@ import {
   X,
   Sun,
   Moon,
+
 } from "lucide-react"
 import Link from "next/link"
 import { cn } from "@/lib/utils"
+import { SignedIn, useClerk, UserButton, useUser } from "@clerk/nextjs"
 import GoogleTranslate from "../google-translate"
+
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const router = useRouter()
   const { theme, setTheme } = useTheme()
 
-  const mainNavigation = [
-    { name: "Dashboard", href: "/dashboard", icon: Gauge },
+  const navigation = [
     { name: "Jobs", href: "/jobs", icon: BriefcaseBusiness },
-    { name: "Resume Tools", href: "/resume-tools", icon: FileText },
-    { name: "Interviews", href: "/interviews", icon: Speech },
+    { name: "Resume", href: "/resume", icon: FileText },
+    { name: "Cover Letters", href: "/cover-letter", icon: FileText },
+    { name: "Mock Interview", href: "/interviews", icon: Speech },
     { name: "Career Guidance", href: "/career-guidance", icon: MessageSquare },
     { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ]
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
+  const { signOut } = useClerk()
+  const { user } = useUser()
+
 
   return (
     <div className="flex min-h-screen">
@@ -73,13 +85,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
               <div className="flex h-9 w-9 items-center justify-center rounded-md border bg-background text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground">
-                  
+
                 <GoogleTranslate />
               </div>
             </div>
 
             <div className="space-y-1">
-              {mainNavigation.map((item) => (
+              {navigation.map((item) => (
                 <Link
                   key={item.name}
                   href={item.href}
@@ -114,6 +126,98 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
         <span className="sr-only">Toggle Menu</span>
       </Button>
       <main className="flex-1 p-4 md:p-8">{children}</main>
+      <div className="flex min-h-screen flex-col">
+        <div className="flex flex-1">
+          {/* Sidebar with full height and smooth transition */}
+          <aside
+            className={cn(
+              "fixed top-0 left-0 z-20 flex h-screen flex-col border-r bg-background transition-all duration-300 ease-in-out",
+              sidebarOpen
+                ? "w-64 translate-x-0"
+                : "w-0 -translate-x-full md:translate-x-0 md:w-20"
+            )}
+          >
+            <div className="flex h-16 items-center justify-between border-b px-4">
+              <Link href="/" className={cn(
+                "flex items-center gap-2 hover:opacity-80 transition",
+                !sidebarOpen && "md:justify-center md:px-0"
+              )}>
+                <Sparkles className="h-6 w-6 text-primary flex-shrink-0" />
+                <span className={cn(
+                  "text-xl font-bold transition-opacity duration-300",
+                  !sidebarOpen && "md:hidden"
+                )}>JobGenie</span>
+              </Link>
+
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggleSidebar}
+                className="transition-all duration-300 ease-in-out hover:bg-muted"
+              >
+                {sidebarOpen ? (
+                  <PanelLeftClose className="h-5 w-5" />
+                ) : (
+                  <PanelLeftOpen className="h-5 w-5" />
+                )}
+                <span className="sr-only">Toggle Sidebar</span>
+              </Button>
+            </div>
+
+            <nav className="flex-1 overflow-auto py-4">
+              <div className="px-3">
+                <div className="space-y-1">
+
+                  {navigation.map((item) => (
+                    <Link
+                      key={item.name}
+                      href={item.href}
+                      className={cn(
+                        "flex items-center gap-3 rounded-md px-3 py-2 text-sm font-medium transition-all duration-200",
+                        router.pathname === item.href || router.pathname.startsWith(`${item.href}/`)
+                          ? "bg-primary/10 text-primary"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                        !sidebarOpen && "md:justify-center md:px-3 md:py-3"
+                      )}
+                      title={!sidebarOpen ? item.name : undefined}
+                    >
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span className={cn(
+                        "transition-opacity duration-300",
+                        !sidebarOpen && "md:hidden"
+                      )}>
+                        {item.name}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            </nav>
+            <div className="p-8 border-t flex justify-between items-center">
+              <div className="flex items-center gap-5">
+                <div className="scale-125">
+                  <UserButton afterSignOutUrl="/" />
+                </div>
+                {user && (
+                  <span className="text-sm font-bold text-black">
+                    {user.fullName || user.firstName || user.emailAddresses[0]?.emailAddress}
+                  </span>
+                )}
+              </div>
+            </div>
+
+          </aside>
+
+          <main className={cn(
+            "flex-1 transition-all duration-300 ease-in-out",
+            sidebarOpen ? "md:ml-64" : "md:ml-20"
+          )}>
+            <div className="container p-6">
+              {children}
+            </div>
+          </main>
+        </div>
+      </div>
     </div>
   )
 }
