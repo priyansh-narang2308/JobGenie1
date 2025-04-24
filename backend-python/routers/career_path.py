@@ -5,7 +5,7 @@ from services import (
     CAREER_PATH_PROMPT
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/api")  # Add prefix for all routes in this router
 
 @router.post("/career-path")
 async def generate_career_path(request: Request):

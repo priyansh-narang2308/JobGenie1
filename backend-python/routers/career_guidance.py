@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Request
 from services import detect_language, translate_text, generate_ai_response, SYSTEM_PROMPT
 
-router = APIRouter()
+router = APIRouter(prefix="/api")  # Add prefix for all routes in this router
 
 @router.post("/career-guidance")
 async def career_guidance(request: Request):
