@@ -1,6 +1,8 @@
 import os
 from dotenv import load_dotenv
 from fastapi import FastAPI
+from dotenv import load_dotenv
+import google.generativeai as genai
 from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
 from routes.jobs_routes import router as jobs_router
