@@ -6,6 +6,7 @@ import CareerGuidance from './CareerGuidance';
 
 export default function CareerGuidancePage() {
   return (
+    
     <DashboardLayout>
       <CareerGuidance />
     </DashboardLayout>

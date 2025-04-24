@@ -268,7 +268,7 @@ export default function JobDetails() {
                       Generate Cover Letter
                     </Button>
                   </Link>
-                  <Link href={`/interviews/practice/${job.id}`}>
+                  <Link href={`/dashboard/practice/${job.id}`}>
                     <Button variant="outline" className="w-full justify-start gap-2">
                       <MessageSquare className="h-4 w-4" />
                       Practice Interview
