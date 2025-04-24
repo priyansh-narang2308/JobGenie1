@@ -4,7 +4,6 @@ import google.generativeai as genai
 import json
 import fitz  # PyMuPDF
 from apify_client import ApifyClient
-from collections import Counter
 
 model = genai.GenerativeModel("gemini-2.5-flash-preview-04-17")
 

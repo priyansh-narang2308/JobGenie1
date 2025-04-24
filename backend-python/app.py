@@ -1,22 +1,11 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 import os
-from fastapi import FastAPI
-from dotenv import load_dotenv
-import google.generativeai as genai
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import google.generativeai as genai
-import os
-from typing import Dict, Any
-from services import extract_resume_skills, fetch_jobs_from_linkedin
-from routers.jobs import router as jobs_router
-from routers.career_guidance import router as career_guidance_router
-from routers.career_path import router as career_path_router
-from routers.career_chatbot import router as career_chatbot_router
+from routes.jobs import router as jobs_router
 
 # Load environment variables
-load_dotenv()
-
 load_dotenv()
 
 from routes import career_guidance_routes
@@ -35,9 +24,7 @@ app.add_middleware(
 )
 
 # Include routerr
-app.include_router(career_guidance_router)
-app.include_router(career_path_router)
-app.include_router(career_chatbot_router)
+app.include_router(career_guidance_routes)
 app.include_router(jobs_router)
 
 # Root endpoint
