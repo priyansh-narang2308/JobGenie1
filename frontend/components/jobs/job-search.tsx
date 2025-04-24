@@ -1,6 +1,6 @@
 import { useState } from "react"
 import { ResumeUpload } from "./resume-upload"
-import { JobResults } from "./job-results"
+import { JobResults, SavedJobs } from "./job-results"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -152,11 +152,14 @@ export function JobSearch() {
       {/* Right side - Results */}
       <div className="space-y-6">
         {searchResults && (
-          <JobResults
-            skills={searchResults.skills}
-            jobs={searchResults.jobs}
-            message={searchResults.message}
-          />
+          <>
+            <JobResults
+              skills={searchResults.skills}
+              jobs={searchResults.jobs}
+              message={searchResults.message}
+            />
+            <SavedJobs />
+          </>
         )}
       </div>
     </div>

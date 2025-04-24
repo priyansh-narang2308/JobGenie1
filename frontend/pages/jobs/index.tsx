@@ -12,7 +12,7 @@ import { BriefcaseBusiness, MapPin, Search } from "lucide-react"
 import Link from "next/link"
 import { useState } from "react"
 import { ResumeUpload } from "@/components/jobs/resume-upload"
-import { JobResults } from "@/components/jobs/job-results"
+import { JobResults, SavedJobs } from "@/components/jobs/job-results"
 import { toast } from "sonner"
 import { Badge } from "@/components/ui/badge"
 
@@ -116,7 +116,6 @@ export default function Jobs() {
             <TabsList>
               <TabsTrigger value="matches">AI Matches</TabsTrigger>
               <TabsTrigger value="saved">Saved Jobs</TabsTrigger>
-              <TabsTrigger value="applied">Applied</TabsTrigger>
             </TabsList>
             <div className="flex items-center gap-2">
               <Label htmlFor="match-threshold" className="text-sm">
@@ -196,6 +195,10 @@ export default function Jobs() {
                 )}
               </div>
             </div>
+          </TabsContent>
+
+          <TabsContent value="saved">
+            <SavedJobs />
           </TabsContent>
         </Tabs>
       </div>
