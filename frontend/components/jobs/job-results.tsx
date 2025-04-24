@@ -23,6 +23,7 @@ interface JobResultsProps {
 
 export function JobResults({ skills, jobs, message }: JobResultsProps) {
   const [savedJobs, setSavedJobs] = useState<Job[]>([])
+  const [minScore, setMinScore] = useState(0) // Default minimum score of 0
 
   // Load saved jobs from localStorage on component mount
   useEffect(() => {
@@ -76,10 +77,16 @@ export function JobResults({ skills, jobs, message }: JobResultsProps) {
     return baseScore + scaledScore
   }
 
-  // Function to get the original score from the relative score
-  const getOriginalScore = (relativeScore: number) => {
-    // Reverse the calculation to get the original score
-    return Math.round(((relativeScore - 50) / 50) * 10)
+  // Debug function to log job scores
+  const logJobScores = (jobs: Job[]) => {
+    console.log('Original jobs:', jobs)
+    const processedJobs = jobs.map(job => ({
+      ...job,
+      originalScore: job.match_score,
+      modifiedScore: getRelativeMatchScore(job.match_score)
+    }))
+    console.log('Processed jobs with scores:', processedJobs)
+    return processedJobs
   }
 
   return (
@@ -109,9 +116,9 @@ export function JobResults({ skills, jobs, message }: JobResultsProps) {
         </CardHeader>
         <CardContent className="space-y-4">
           {jobs.length > 0 ? (
-            jobs
-              .filter(job => job.match_score > 0) // Only filter out jobs with 0 match score
-              .sort((a, b) => b.match_score - a.match_score) // Sort by match score
+            logJobScores(jobs)
+              .filter(job => job.modifiedScore >= 0) // Filter based on modified score, starting from 0
+              .sort((a, b) => b.modifiedScore - a.modifiedScore) // Sort by modified score
               .map((job, index) => (
                 <Card key={index} className="border">
                   <CardHeader>
@@ -125,7 +132,7 @@ export function JobResults({ skills, jobs, message }: JobResultsProps) {
                       <div className="flex flex-col items-end">
                         <span className="text-sm text-muted-foreground mb-1">Match Score</span>
                         <Badge variant="outline" className="text-lg font-bold px-3 py-1">
-                          {getRelativeMatchScore(job.match_score)}%
+                          {job.modifiedScore}%
                         </Badge>
                       </div>
                     </div>
@@ -142,10 +149,7 @@ export function JobResults({ skills, jobs, message }: JobResultsProps) {
                           </Badge>
                         ))}
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="text-sm text-muted-foreground">
-                          Posted: {job.posted_date}
-                        </span>
+                      <div className="flex justify-end items-center">
                         <div className="flex gap-2">
                           <Button
                             variant="outline"
@@ -277,10 +281,7 @@ export function SavedJobs() {
                     </Badge>
                   ))}
                 </div>
-                <div className="flex justify-between items-center">
-                  <span className="text-sm text-muted-foreground">
-                    Posted: {job.posted_date}
-                  </span>
+                <div className="flex justify-end items-center">
                   <div className="flex gap-2">
                     <Button
                       variant="outline"

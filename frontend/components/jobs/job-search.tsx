@@ -28,6 +28,7 @@ export function JobSearch() {
   const [position, setPosition] = useState("")
   const [location, setLocation] = useState("")
   const [jobType, setJobType] = useState("")
+  const [minMatchScore, setMinMatchScore] = useState(0)
   const [searchResults, setSearchResults] = useState<JobSearchResponse | null>(null)
   const [isSearching, setIsSearching] = useState(false)
   const [error, setError] = useState("")
