@@ -2,7 +2,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
-import resumeRoutes from './routes/resumeRoutes.js'; 
+import resumeRoutes from './routes/resumeRoutes.js';
+import newsRoutes from './routes/newsRoutes.js';  
 
 dotenv.config();
 
@@ -18,5 +19,6 @@ app.use((req, res, next) => {
 });
 
 app.use('/api/resume', resumeRoutes);
+app.use('/api/news', newsRoutes);
 
 export default app;

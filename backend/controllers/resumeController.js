@@ -221,10 +221,8 @@ Return only the modified LaTeX content.
         resumeBase64 = resumePdf.toString('base64');
         break;
       } catch (err) {
-        console.log(PROMPT)
         console.error(`Attempt ${resumeAttempts + 1} failed!`, err);
         PROMPT += `\n\nError encountered: ${err.message}. PREVENT this error.`;
-        console.log(PROMPT)
         resumeAttempts++;
       }
     }
