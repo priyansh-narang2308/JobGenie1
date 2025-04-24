@@ -3,3 +3,7 @@ uvicorn
 googletrans==4.0.0rc1
 python-dotenv
 google-generativeai
+uvicorn==0.24.0
+python-multipart==0.0.6
+PyMuPDF==1.23.8
+apify-client 
