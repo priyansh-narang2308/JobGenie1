@@ -9,11 +9,11 @@ router = APIRouter(prefix="/api/jobs", tags=["jobs"])
 async def search_jobs(
     position: str = Form(...),
     location: str = Form(...),
-    job_type: str = Form(...),
+    jobType: str = Form(..., alias="job_type"),
     resume: UploadFile = File(..., alias="resume")
 ) -> Dict[str, Any]:
     try:
-        print(f"Received job search request: position={position}, location={location}, job_type={job_type}")
+        print(f"Received job search request: position={position}, location={location}, job_type={jobType}")
         
         if not resume.filename.endswith('.pdf'):
             raise HTTPException(status_code=400, detail="Only PDF files are allowed")
@@ -34,7 +34,7 @@ async def search_jobs(
             )
         
         print("Fetching matching jobs...")
-        jobs = fetch_jobs_from_linkedin(position, location, job_type, skills)
+        jobs = fetch_jobs_from_linkedin(position, location, jobType, skills)
         
         os.remove(temp_path)
         
