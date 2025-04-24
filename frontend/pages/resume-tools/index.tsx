@@ -1,378 +1,531 @@
 "use client"
 
+import axios from 'axios'
+import { useState, useEffect } from "react"
+import { useRouter } from 'next/router'
 import DashboardLayout from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { AlertCircle, ArrowUpDown, Check, Download, FileText, Upload } from "lucide-react"
-import { useState } from "react"
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Textarea } from "@/components/ui/textarea"
+import { AlertCircle, Check, Download, FileText, Upload } from "lucide-react"
+
+interface MatchedSkill {
+  skill: string
+  isMatch: boolean
+}
+
+interface ResumeIssue {
+  type: "warning" | "info"
+  message: string
+  suggestion: string | null
+}
+
+interface AnalysisItem {
+  type: 'done' | 'warning';
+  text: string;
+}
 
 export default function Resume() {
-  const [activeTab, setActiveTab] = useState("current")
-  const [optimizing, setOptimizing] = useState(false)
+  const router = useRouter()
+  const [file, setFile] = useState<File | null>(null)
+  const [jobDescription, setJobDescription] = useState("")
+  const [selfDescription, setSelfDescription] = useState("")
+  const [isDragging, setIsDragging] = useState(false)
+  const [isProcessing, setIsProcessing] = useState(false)
+  const [isComplete, setIsComplete] = useState(false)
+  const [atsScore, setAtsScore] = useState<number | null>(null)
+  const [resumeIssues, setResumeIssues] = useState<ResumeIssue[]>([])
+  const [resumeSkills, setResumeSkills] = useState<string[]>([])
+  const [jobSkills, setJobSkills] = useState<string[]>([])
+  const [skillsMatchPercentage, setSkillsMatchPercentage] = useState<number>(0)
+  const [isCustomizing, setIsCustomizing] = useState(false)
+  const [isGeneratingCover, setIsGeneratingCover] = useState(false)
+  const [extractedText, setExtractedText] = useState("")
+  const [resumeUrl, setResumeUrl] = useState("")
+  const [coverLetterUrl, setCoverLetterUrl] = useState("")
 
-  // Mock resume data
-  const resumeScore = 78
-  const resumeIssues = [
-    {
-      type: "warning",
-      message: "Your resume lacks quantifiable achievements",
-      suggestion: "Add metrics and specific results to your work experience",
-    },
-    {
-      type: "warning",
-      message: "Skills section needs improvement",
-      suggestion: "Add more relevant technical skills based on job market demand",
-    },
-    {
-      type: "info",
-      message: "Education section is well formatted",
-      suggestion: null,
-    },
-  ]
+  useEffect(() => {
+    if (isProcessing) { 
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [isProcessing])
 
-  const handleOptimize = () => {
-    setOptimizing(true)
-    // Simulate optimization process
-    setTimeout(() => {
-      setOptimizing(false)
-      setActiveTab("optimized")
-    }, 3000)
+  useEffect(() => {
+    if (isComplete) {
+      const timer = setTimeout(() => {
+      }, 3000)
+      return () => clearTimeout(timer)
+    }
+  }, [isComplete])
+
+  const handleATSAnalysis = async () => {
+    try {
+      const response = await axios.post('http://localhost:5000/api/resume/eval-ats', {
+        jdText: jobDescription,
+        resumeText: extractedText,
+      });
+
+      if (response.data) {
+        setAtsScore(response.data.score);
+        setResumeIssues(
+          response.data.analysis.map((item: AnalysisItem) => ({
+            type: item.type === 'done' ? 'info' : 'warning',
+            message: item.text,
+            suggestion: null,
+          }))
+        );
+      }
+    } catch (error) {
+      console.error('Error fetching ATS analysis:', error);
+      alert('Failed to fetch ATS analysis. Please try again.');
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(true)
+  }
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+  }
+
+  const handleDrop = async (e: React.DragEvent) => {
+    e.preventDefault()
+    setIsDragging(false)
+    const droppedFile = e.dataTransfer.files[0]
+    if (droppedFile?.type === "application/pdf") {
+      setFile(droppedFile)
+      await extractTextFromResume(droppedFile)
+    } else {
+      alert("Please upload a PDF file")
+    }
+  }
+
+  const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const selectedFile = e.target.files?.[0]
+    if (selectedFile?.type === "application/pdf") {
+      setFile(selectedFile)
+      await extractTextFromResume(selectedFile)
+    } else {
+      alert("Please upload a PDF file")
+    }
+  }
+
+  const extractTextFromResume = async (file: File) => {
+    try {
+      const formData = new FormData()
+      formData.append('file', file)
+
+      const response = await axios.post('http://localhost:5000/api/resume/extract-text', formData)
+      if (response.data.resumeText) {
+        setExtractedText(response.data.resumeText)
+      }
+    } catch (error) {
+      console.error('Error extracting text:', error)
+      alert('Error extracting text from resume')
+    }
+  }
+
+  const handleSubmit = async () => {
+    if (!file) {
+      alert("Please upload a resume first")
+      return
+    }
+    if (!jobDescription.trim()) {
+      alert("Please paste the job description")
+      return
+    }
+
+    setIsProcessing(true)
+    setIsCustomizing(true)
+    setIsGeneratingCover(true)
+
+    try {
+      const skillsResponse = await axios.post('http://localhost:5000/api/resume/extract-skills', {
+        text: extractedText
+      })
+
+      if (skillsResponse.data.skills) {
+        setResumeSkills(skillsResponse.data.skills)
+      }
+
+      const jobSkillsResponse = await axios.post('http://localhost:5000/api/resume/extract-jd-skills', {
+        text: jobDescription
+      })
+
+      if (jobSkillsResponse.data.skills) {
+        setJobSkills(jobSkillsResponse.data.skills)
+
+        const compareResponse = await axios.post('http://localhost:5000/api/resume/match-skills', {
+          jdSkills: jobSkillsResponse.data.skills,
+          resumeSkills: skillsResponse.data.skills
+        })
+
+        if (compareResponse.data) {
+          setSkillsMatchPercentage(compareResponse.data.matchPercentage)
+        }
+      }
+      setIsProcessing(true);
+
+      await handleATSAnalysis();
+
+      setIsComplete(true)
+      
+      Promise.all([
+        axios.post('http://localhost:5000/api/resume/customise', {
+          resumeText: extractedText,
+          jobDescription,
+          selfDescription
+        }).then(resumeResponse => {
+          if (resumeResponse.data.resume) {
+            const blob = base64ToBlob(resumeResponse.data.resume, 'application/pdf')
+            setResumeUrl(URL.createObjectURL(blob))
+          }
+          setIsCustomizing(false)
+        }).catch(error => {
+          console.error('Error customizing resume:', error)
+          setIsCustomizing(false)
+        }),
+
+        axios.post('http://localhost:5000/api/resume/generate-cover-letter', {
+          resumeText: extractedText,
+          jobDescription,
+          selfDescription
+        }).then(coverResponse => {
+          if (coverResponse.data.coverLetter) {
+            const blob = base64ToBlob(coverResponse.data.coverLetter, 'application/pdf')
+            setCoverLetterUrl(URL.createObjectURL(blob))
+          }
+          setIsGeneratingCover(false)
+        }).catch(error => {
+          console.error('Error generating cover letter:', error)
+          setIsGeneratingCover(false)
+        })
+      ]).catch(error => {
+        console.error('Error in optimization:', error)
+        alert('An error occurred during processing')
+        setIsProcessing(false)
+        setIsCustomizing(false)
+        setIsGeneratingCover(false)
+      })
+
+    } catch (error) {
+      console.error('Error in optimization:', error)
+      alert('An error occurred during processing')
+      setIsProcessing(false)
+      setIsCustomizing(false)
+      setIsGeneratingCover(false)
+    }
+  }
+
+  const base64ToBlob = (base64: string, mime: string) => {
+    const byteCharacters = atob(base64)
+    const byteNumbers = new Array(byteCharacters.length).fill(0).map((_, i) => byteCharacters.charCodeAt(i))
+    const byteArray = new Uint8Array(byteNumbers)
+    return new Blob([byteArray], { type: mime })
+  }
+
+  const downloadResume = () => {
+    if (resumeUrl) {
+      window.open(resumeUrl, '_blank')
+    }
+  }
+
+  const downloadCoverLetter = () => {
+    if (coverLetterUrl) {
+      window.open(coverLetterUrl, '_blank')
+    }
+  }
+
+  const getMatchColor = (match: "high" | "medium" | "low") => {
+    switch (match) {
+      case "high":
+        return "bg-green-500/10 text-green-700"
+      case "medium":
+        return "bg-yellow-500/10 text-yellow-700"
+      case "low":
+        return "bg-red-500/10 text-red-700"
+    }
   }
 
   return (
     <DashboardLayout>
-      <div className="flex flex-col gap-6 p-4 md:gap-8 md:p-8">
+      <div className="flex flex-col gap-6 p-4 md:gap-6 md:p-6">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Resume Tools</h1>
-          <p className="text-muted-foreground">Upload, analyze, and optimize your resume for specific jobs</p>
+          <p className="text-muted-foreground">Upload your resume and customise it for specific job descriptions - cover letters too!</p>
         </div>
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          <Card className="col-span-full lg:col-span-2">
-            <CardHeader>
-              <CardTitle>Your Resume</CardTitle>
-              <CardDescription>Upload your resume to analyze and optimize it for job applications</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <Tabs value={activeTab} onValueChange={setActiveTab}>
-                <TabsList>
-                  <TabsTrigger value="current">Current Resume</TabsTrigger>
-                  <TabsTrigger value="optimized" disabled={!optimizing && activeTab !== "optimized"}>
-                    Optimized Resume
-                  </TabsTrigger>
-                </TabsList>
-                <TabsContent value="current" className="mt-4">
-                  <div className="rounded-lg border">
-                    <div className="flex items-center justify-between border-b p-4">
-                      <div className="flex items-center gap-2">
-                        <FileText className="h-5 w-5 text-muted-foreground" />
-                        <span className="font-medium">John_Doe_Resume.pdf</span>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <Button variant="outline" size="sm">
-                          <Download className="mr-2 h-4 w-4" />
-                          Download
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Upload className="mr-2 h-4 w-4" />
-                          Update
-                        </Button>
-                      </div>
-                    </div>
-                    <div className="h-[400px] overflow-auto p-4">
+
+        <div className="relative">
+          <div
+            className={`space-y-6 transition-all duration-500 ${
+              isProcessing ? "opacity-0 translate-y-[-1rem] pointer-events-none absolute inset-x-0" : "opacity-100"
+            }`}
+          >
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle>Upload Resume</CardTitle>
+                <CardDescription>Drag and drop your resume or click to upload</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div
+                  className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
+                    isDragging ? "border-primary bg-primary/5" : "border-muted"
+                  }`}
+                  onDragOver={handleDragOver}
+                  onDragLeave={handleDragLeave}
+                  onDrop={handleDrop}
+                >
+                  <input
+                    type="file"
+                    accept=".pdf"
+                    onChange={handleFileChange}
+                    className="hidden"
+                    id="resume-upload"
+                  />
+                  <label
+                    htmlFor="resume-upload"
+                    className="flex flex-col items-center gap-2 cursor-pointer"
+                  >
+                    <Upload className="h-6 w-6 text-muted-foreground" />
+                    <span className="font-medium">
+                      {file ? file.name : "Drop your resume here or click to browse"}
+                    </span>
+                    <span className="text-sm text-muted-foreground">
+                      Supports PDF files only
+                    </span>
+                  </label>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle>Job Description</CardTitle>
+                <CardDescription>Paste the job description you want to optimize for</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  placeholder="Paste the job description here..."
+                  value={jobDescription}
+                  onChange={(e) => setJobDescription(e.target.value)}
+                  rows={5}
+                />
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle>Self Description (Optional)</CardTitle>
+                <CardDescription>Add any additional information about yourself</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <Textarea
+                  placeholder="Describe your additional skills, experiences, or preferences..."
+                  value={selfDescription}
+                  onChange={(e) => setSelfDescription(e.target.value)}
+                  rows={3}
+                />
+              </CardContent>
+            </Card>
+
+            <div className="flex justify-end">
+              <Button onClick={handleSubmit}>
+                Analyse & Generate
+              </Button>
+            </div>
+          </div>
+
+          <div
+            className={`grid gap-6 grid-cols-1 md:grid-cols-2 transition-all duration-500 ${
+              isProcessing ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none absolute inset-x-0"
+            }`}
+          >
+            <Card>
+              <CardHeader>
+                <CardTitle>{isComplete ? "Processed JD" : "Processing JD"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    {!isComplete && (
+                      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    )}
+                  </div>
+                  {isComplete && (
+                    <div className="space-y-6 transition-opacity duration-300">
                       <div className="space-y-4">
                         <div>
-                          <h2 className="text-xl font-bold">John Doe</h2>
-                          <p className="text-muted-foreground">Frontend Developer | San Francisco, CA</p>
-                          <p className="text-sm text-muted-foreground">john.doe@example.com | (555) 123-4567</p>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">Summary</h3>
-                          <p className="text-sm">
-                            Frontend Developer with 4 years of experience building responsive web applications using
-                            React, TypeScript, and Next.js. Passionate about creating intuitive user interfaces and
-                            optimizing web performance.
-                          </p>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">Experience</h3>
-                          <div className="mt-2 space-y-4">
-                            <div>
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-medium">Frontend Developer</h4>
-                                <span className="text-sm text-muted-foreground">2020 - Present</span>
+                          <h3 className="font-medium mb-2">Required Skills</h3>
+                          <div className="flex flex-wrap gap-2">
+                            {jobSkills.map((skill) => (
+                              <div
+                                key={skill}
+                                className="px-2 py-1 rounded-md text-sm bg-yellow-500/10 text-yellow-700"
+                              >
+                                {skill}
                               </div>
-                              <p className="text-sm text-muted-foreground">WebTech Solutions, San Francisco, CA</p>
-                              <ul className="mt-1 list-disc pl-5 text-sm">
-                                <li>Developed responsive web applications using React and TypeScript</li>
-                                <li>Collaborated with designers to implement UI/UX improvements</li>
-                                <li>Worked with backend developers to integrate APIs</li>
-                                <li>Implemented state management using Redux and Context API</li>
-                              </ul>
-                            </div>
-                            <div>
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-medium">Junior Web Developer</h4>
-                                <span className="text-sm text-muted-foreground">2018 - 2020</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">Digital Creations, Portland, OR</p>
-                              <ul className="mt-1 list-disc pl-5 text-sm">
-                                <li>Built and maintained websites using HTML, CSS, and JavaScript</li>
-                                <li>Assisted senior developers with frontend tasks</li>
-                                <li>Participated in code reviews and team meetings</li>
-                              </ul>
-                            </div>
+                            ))}
                           </div>
                         </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">Education</h3>
-                          <div className="mt-2">
-                            <div className="flex items-center justify-between">
-                              <h4 className="font-medium">Bachelor of Science in Computer Science</h4>
-                              <span className="text-sm text-muted-foreground">2014 - 2018</span>
-                            </div>
-                            <p className="text-sm text-muted-foreground">University of Oregon</p>
+
+                        <div className="pt-4 border-t">
+                          <div className="flex items-center justify-between mb-2">
+                            <h3 className="font-medium">Skills Match</h3>
+                            <span className="text-sm font-medium text-primary">
+                              {skillsMatchPercentage}%
+                            </span>
                           </div>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-semibold">Skills</h3>
-                          <div className="mt-2 flex flex-wrap gap-2">
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">React</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">TypeScript</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">JavaScript</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">HTML</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">CSS</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">Next.js</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">Redux</div>
-                            <div className="rounded-full bg-muted px-3 py-1 text-xs">Git</div>
+                          <div className="h-2 rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full bg-primary transition-all duration-1000 ease-in-out"
+                              style={{ width: `${skillsMatchPercentage}%` }}
+                            />
                           </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </TabsContent>
-                <TabsContent value="optimized" className="mt-4">
-                  {optimizing ? (
-                    <div className="flex flex-col items-center justify-center rounded-lg border p-12">
-                      <div className="space-y-4 text-center">
-                        <div className="relative h-16 w-16">
-                          <div className="absolute inset-0 flex items-center justify-center">
-                            <ArrowUpDown className="h-8 w-8 text-primary animate-pulse" />
-                          </div>
-                          <div className="absolute inset-0 border-4 border-primary/30 border-t-primary rounded-full animate-spin"></div>
-                        </div>
-                        <div>
-                          <h3 className="text-lg font-medium">Optimizing Your Resume</h3>
-                          <p className="text-sm text-muted-foreground">
-                            Our AI is analyzing and optimizing your resume for the selected job...
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="rounded-lg border">
-                      <div className="flex items-center justify-between border-b p-4">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-5 w-5 text-primary" />
-                          <span className="font-medium">John_Doe_Resume_Optimized.pdf</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Button variant="outline" size="sm">
-                            <Download className="mr-2 h-4 w-4" />
-                            Download
-                          </Button>
-                        </div>
-                      </div>
-                      <div className="h-[400px] overflow-auto p-4">
-                        <div className="space-y-4">
-                          <div>
-                            <h2 className="text-xl font-bold">John Doe</h2>
-                            <p className="text-muted-foreground">Senior Frontend Developer | San Francisco, CA</p>
-                            <p className="text-sm text-muted-foreground">
-                              john.doe@example.com | (555) 123-4567 | linkedin.com/in/johndoe
-                            </p>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Summary</h3>
-                            <p className="text-sm">
-                              <span className="bg-primary/10 px-1">
-                                Senior Frontend Developer with 4+ years of experience building high-performance web
-                                applications using React, TypeScript, and Next.js.
-                              </span>{" "}
-                              Proven track record of{" "}
-                              <span className="bg-primary/10 px-1">
-                                developing reusable components and optimizing frontend performance
-                              </span>
-                              . Passionate about creating intuitive user interfaces and delivering exceptional user
-                              experiences.
-                            </p>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Experience</h3>
-                            <div className="mt-2 space-y-4">
-                              <div>
-                                <div className="flex items-center justify-between">
-                                  <h4 className="font-medium">Frontend Developer</h4>
-                                  <span className="text-sm text-muted-foreground">2020 - Present</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">WebTech Solutions, San Francisco, CA</p>
-                                <ul className="mt-1 list-disc pl-5 text-sm">
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Developed and maintained multiple React applications, reducing load time by 40%
-                                      through code optimization
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Built a component library of 30+ reusable UI components, improving development
-                                      efficiency by 25%
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Implemented TypeScript across 5 projects, reducing bugs in production by 30%
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Collaborated with UX designers to implement responsive designs that increased
-                                      mobile user engagement by 45%
-                                    </span>
-                                  </li>
-                                </ul>
-                              </div>
-                              <div>
-                                <div className="flex items-center justify-between">
-                                  <h4 className="font-medium">Junior Web Developer</h4>
-                                  <span className="text-sm text-muted-foreground">2018 - 2020</span>
-                                </div>
-                                <p className="text-sm text-muted-foreground">Digital Creations, Portland, OR</p>
-                                <ul className="mt-1 list-disc pl-5 text-sm">
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Developed and maintained 10+ client websites using HTML, CSS, and JavaScript
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Reduced page load times by 35% through image optimization and code refactoring
-                                    </span>
-                                  </li>
-                                  <li>
-                                    <span className="bg-primary/10 px-1">
-                                      Participated in 20+ client meetings to gather requirements and present solutions
-                                    </span>
-                                  </li>
-                                </ul>
-                              </div>
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Education</h3>
-                            <div className="mt-2">
-                              <div className="flex items-center justify-between">
-                                <h4 className="font-medium">Bachelor of Science in Computer Science</h4>
-                                <span className="text-sm text-muted-foreground">2014 - 2018</span>
-                              </div>
-                              <p className="text-sm text-muted-foreground">University of Oregon</p>
-                            </div>
-                          </div>
-                          <div>
-                            <h3 className="text-lg font-semibold">Skills</h3>
-                            <div className="mt-2 flex flex-wrap gap-2">
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                React
-                              </div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                TypeScript
-                              </div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                Next.js
-                              </div>
-                              <div className="rounded-full bg-muted px-3 py-1 text-xs">JavaScript</div>
-                              <div className="rounded-full bg-muted px-3 py-1 text-xs">HTML/CSS</div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                Redux
-                              </div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                RESTful APIs
-                              </div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                UI/UX
-                              </div>
-                              <div className="rounded-full bg-muted px-3 py-1 text-xs">Git</div>
-                              <div className="rounded-full bg-primary/10 px-3 py-1 text-xs font-medium text-primary">
-                                Performance Optimization
-                              </div>
-                            </div>
+                          <div className="mt-8 text-right">
+                            <Button 
+                              variant="secondary"
+                              onClick={() => router.push('/career-guidance')}
+                            >
+                              Get Career Guidance
+                            </Button>
                           </div>
                         </div>
                       </div>
                     </div>
                   )}
-                </TabsContent>
-              </Tabs>
-            </CardContent>
-            <CardFooter className="flex justify-between">
-              <Button variant="outline">
-                <Upload className="mr-2 h-4 w-4" />
-                Upload New Resume
-              </Button>
-              <Button onClick={handleOptimize} disabled={optimizing}>
-                {optimizing ? "Optimizing..." : "Optimize for Job"}
-              </Button>
-            </CardFooter>
-          </Card>
-          <Card>
-            <CardHeader>
-              <CardTitle>Resume Analysis</CardTitle>
-              <CardDescription>AI-powered insights to improve your resume</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                <div className="flex flex-col items-center">
-                  <div
-                    className="relative flex h-32 w-32 items-center justify-center rounded-full"
-                    style={{
-                      background: `conic-gradient(hsl(${resumeScore * 1.2}, 100%, 50%) ${resumeScore}%, transparent 0)`,
-                    }}
-                  >
-                    <div className="absolute inset-2 flex items-center justify-center rounded-full bg-card">
-                      <div className="text-center">
-                        <div className="text-3xl font-bold">{resumeScore}</div>
-                        <div className="text-xs text-muted-foreground">Resume Score</div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>{isComplete ? "Analysed Resume" : "Analysing Resume"}</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-4">
+                    {!isComplete && (
+                      <div className="h-8 w-8 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                    )}
+                  </div>
+                  {isComplete && atsScore !== null && (
+                    <div className="space-y-6 opacity-0 transition-opacity duration-500" style={{ animation: 'fadeIn 0.5s ease-out 0.3s forwards' }}>
+                      <div className="flex flex-col items-center">
+                        <div
+                          className="relative flex h-32 w-32 items-center justify-center rounded-full transition-all duration-1000"
+                          style={{
+                            background: `conic-gradient(hsl(${atsScore * 1.2}, 100%, 50%) ${atsScore}%, transparent 0)`,
+                          }}
+                        >
+                          <div className="absolute inset-2 flex items-center justify-center rounded-full bg-card">
+                            <div className="text-center">
+                              <div className="text-3xl font-bold">{atsScore}</div>
+                              <div className="text-xs text-muted-foreground">ATS Score</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="space-y-4">
+                        <h3 className="font-medium">ATS Analysis</h3>
+                        <div className="space-y-3">
+                          {resumeIssues.map((issue, index) => (
+                            <div
+                              key={index}
+                              className="flex gap-2 p-3 rounded-lg border transition-all duration-300"
+                              style={{
+                                animation: `fadeIn 0.5s ease-out ${0.5 + index * 0.1}s forwards`,
+                                opacity: 0
+                              }}
+                            >
+                              <div className="mt-0.5">
+                                {issue.type === "warning" ? (
+                                  <AlertCircle className="h-4 w-4 text-yellow-500" />
+                                ) : (
+                                  <Check className="h-4 w-4 text-green-500" />
+                                )}
+                              </div>
+                              <div>
+                                <p className="text-sm font-medium">{issue.message}</p>
+                                {issue.suggestion && (
+                                  <p className="text-xs text-muted-foreground mt-1">{issue.suggestion}</p>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
                       </div>
                     </div>
-                  </div>
-                  <div className="mt-4 text-center">
-                    <p className="text-sm text-muted-foreground">
-                      Your resume is good, but there's room for improvement
-                    </p>
-                  </div>
+                  )}
                 </div>
-                <div className="space-y-4">
-                  <h3 className="text-sm font-medium">Key Insights</h3>
-                  {resumeIssues.map((issue, index) => (
-                    <div key={index} className="flex gap-3 rounded-lg border p-3">
-                      <div className="mt-0.5">
-                        {issue.type === "warning" ? (
-                          <AlertCircle className="h-5 w-5 text-yellow-500" />
-                        ) : (
-                          <Check className="h-5 w-5 text-green-500" />
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-medium">{issue.message}</p>
-                        {issue.suggestion && <p className="text-sm text-muted-foreground">{issue.suggestion}</p>}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+              </CardContent>
+            </Card>
+
+            {isComplete && (
+              <div className="col-span-full flex justify-end gap-4 opacity-0 transition-opacity duration-300" style={{ animation: 'fadeIn 0.3s ease-out 0.6s forwards' }}>
+                <Button variant="outline" disabled={isCustomizing} onClick={downloadResume}>
+                  <div className="flex items-center gap-2">
+                    {isCustomizing ? (
+                      <>
+                        <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        <span>Customizing Resume...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        <span>Download Resume</span>
+                      </>
+                    )}
+                  </div>
+                </Button>
+                <Button 
+                  variant="outline" 
+                  disabled={isGeneratingCover} 
+                  onClick={downloadCoverLetter}
+                >
+                  <div className="flex items-center gap-2">
+                    {isGeneratingCover ? (
+                      <>
+                        <div className="h-4 w-4 rounded-full border-2 border-primary border-t-transparent animate-spin" />
+                        <span>Generating Cover Letter...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Download className="h-4 w-4" />
+                        <span>Download Cover Letter</span>
+                      </>
+                    )}
+                  </div>
+                </Button>
               </div>
-            </CardContent>
-          </Card>
+            )}
+          </div>
         </div>
+
+        <style jsx>{`
+          @keyframes slideIn {
+            from {
+              opacity: 0;
+              transform: translateX(-0.5rem);
+            }
+            to {
+              opacity: 1;
+              transform: translateX(0);
+            }
+          }
+
+          @keyframes fadeIn {
+            from {
+              opacity: 0;
+            }
+            to {
+              opacity: 1;
+            }
+          }
+        `}</style>
       </div>
     </DashboardLayout>
   )
