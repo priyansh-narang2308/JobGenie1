@@ -2,19 +2,16 @@
 
 import DashboardLayout from "@/components/layout/dashboard-layout"
 import { Button } from "@/components/ui/button"
-import { Card, CardContent } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
-import { BriefcaseBusiness, MapPin, Search } from "lucide-react"
-import Link from "next/link"
+import { Search } from "lucide-react"
 import { useState } from "react"
 import { ResumeUpload } from "@/components/jobs/resume-upload"
 import { JobResults, SavedJobs } from "@/components/jobs/job-results"
 import { toast } from "sonner"
-import { Badge } from "@/components/ui/badge"
 
 interface Job {
   title: string

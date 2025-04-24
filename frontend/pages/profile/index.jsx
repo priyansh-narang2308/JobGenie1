@@ -311,64 +311,79 @@ export default function ProfilePage() {
                             </Card>
                         </TabsContent>
 
-                        <TabsContent value="notifications" className="mt-6">
-                            <Card>
-                                <CardHeader>
-                                    <CardTitle>Notification Preferences</CardTitle>
-                                    <CardDescription>
-                                        Manage how and when you receive notifications.
-                                    </CardDescription>
-                                </CardHeader>
-                                <CardContent className="space-y-4">
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label>Email notifications</Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Receive notifications about account activity via email.
-                                            </p>
+                            <TabsContent value="notifications" className="mt-6">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>Notification Preferences</CardTitle>
+                                        <CardDescription>
+                                            Manage how and when you receive notifications.
+                                        </CardDescription>
+                                    </CardHeader>
+                                    <CardContent className="space-y-4">
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <Label>Email notifications</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Receive notifications about account activity via email.
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                defaultChecked={true}
+                                                disabled={!isEditing}
+                                                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                            />
                                         </div>
-                                        <Switch defaultChecked={true} disabled={!isEditing} />
-                                    </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label>Job alerts</Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Get notified about new job matches and opportunities.
-                                            </p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <Label>Job alerts</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Get notified about new job matches and opportunities.
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                defaultChecked={true}
+                                                disabled={!isEditing}
+                                                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                            />
                                         </div>
-                                        <Switch defaultChecked={true} disabled={!isEditing} />
-                                    </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label>Marketing emails</Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Receive news, updates, and promotional content.
-                                            </p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <Label>Marketing emails</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Receive news, updates, and promotional content.
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                disabled={!isEditing}
+                                                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                            />
                                         </div>
-                                        <Switch disabled={!isEditing} />
-                                    </div>
 
-                                    <div className="flex items-center justify-between">
-                                        <div className="space-y-0.5">
-                                            <Label>Application updates</Label>
-                                            <p className="text-sm text-muted-foreground">
-                                                Get notified about the status of your job applications.
-                                            </p>
+                                        <div className="flex items-center justify-between">
+                                            <div className="space-y-0.5">
+                                                <Label>Application updates</Label>
+                                                <p className="text-sm text-muted-foreground">
+                                                    Get notified about the status of your job applications.
+                                                </p>
+                                            </div>
+                                            <Switch
+                                                defaultChecked={true}
+                                                disabled={!isEditing}
+                                                className="data-[state=checked]:bg-primary data-[state=unchecked]:bg-input"
+                                            />
                                         </div>
-                                        <Switch defaultChecked={true} disabled={!isEditing} />
-                                    </div>
 
-                                    {isEditing && (
-                                        <Button className="mt-4 gap-2">
-                                            <Save className="h-4 w-4" />
-                                            Save preferences
-                                        </Button>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </TabsContent>
+                                        {isEditing && (
+                                            <Button className="mt-4 gap-2">
+                                                <Save className="h-4 w-4" />
+                                                Save preferences
+                                            </Button>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            </TabsContent>
                     </Tabs>
                 </div>
             </div>

@@ -26,7 +26,6 @@ export default function JobDetails() {
   const router = useRouter()
   const { id } = router.query
 
-  // Mock job data - in a real app, you would fetch this based on the ID
   const job = {
     id: id || "1",
     title: "Senior Frontend Developer",
