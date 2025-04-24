@@ -73,7 +73,9 @@ export default function CareerGuidance() {
   ]
 
   return (
+    
     <DashboardLayout>
+    
       <div className="flex flex-col gap-6 p-4 md:gap-8 md:p-8">
         <div className="flex flex-col gap-2">
           <h1 className="text-3xl font-bold tracking-tight">Career Guidance</h1>
@@ -178,7 +180,7 @@ export default function CareerGuidance() {
                     <a href="/resume">Resume Optimization</a>
                   </Button>
                   <Button variant="outline" className="w-full justify-start text-left" asChild>
-                    <a href="/interviews">Interview Preparation</a>
+                    <a href="/dashboard">Interview Preparation</a>
                   </Button>
                   <Button variant="outline" className="w-full justify-start text-left" asChild>
                     <a href="/learning">Skill Development</a>

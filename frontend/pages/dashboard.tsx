@@ -5,7 +5,6 @@ import { BriefcaseBusiness, FileText, LineChart, MessageSquare, TrendingUp } fro
 import Link from "next/link"
 
 export default function Dashboard() {
-  // Mock data for dashboard
   const stats = [
     {
       title: "Profile Completion",
@@ -228,7 +227,7 @@ export default function Dashboard() {
                   <div className="flex-1">
                     <p className="font-medium">Practice for upcoming interview</p>
                     <p className="text-sm text-muted-foreground">Scheduled for TechCorp Inc. on Friday at 2:00 PM</p>
-                    <Link href="/interviews/practice/1" className="mt-2 inline-block text-sm font-medium text-primary">
+                    <Link href="/dashboard/practice/1" className="mt-2 inline-block text-sm font-medium text-primary">
                       Start practice
                     </Link>
                   </div>

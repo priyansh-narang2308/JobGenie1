@@ -43,27 +43,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
   return (
     <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-30 flex h-16 items-center gap-4 border-b bg-background px-4 md:px-6">
-        <Button variant="outline" size="icon" className="md:hidden" onClick={() => setSidebarOpen(!sidebarOpen)}>
-          <Menu className="h-5 w-5" />
-          <span className="sr-only">Toggle Menu</span>
-        </Button>
-        <div className="flex items-center gap-2">
-          <Sparkles className="h-6 w-6 text-primary" />
-          <span className="text-xl font-bold">JobGenie</span>
-        </div>
-        <div className="ml-auto flex items-center gap-4">
-          <Button variant="outline" size="icon" className="relative">
-            <Bell className="h-5 w-5" />
-            <span className="absolute right-1 top-1 flex h-2 w-2 rounded-full bg-primary"></span>
-            <span className="sr-only">Notifications</span>
-          </Button>
-          <Avatar>
-            <AvatarImage src="/placeholder.svg?height=32&width=32" alt="User" />
-            <AvatarFallback>JD</AvatarFallback>
-          </Avatar>
-        </div>
-      </header>
+
       <div className="flex flex-1">
         <aside
           className={cn(

@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button"
+import { SignInButton, SignUpButton } from "@clerk/nextjs"
 import { ArrowRight, BriefcaseBusiness, FileText, MessageSquare, Sparkles } from "lucide-react"
 import Image from "next/image"
 import Link from "next/link"
@@ -27,12 +28,12 @@ export default function Home() {
             </Link>
           </nav>
           <div className="flex gap-4">
-            <Link href="/login">
-              <Button variant="outline">Log In</Button>
-            </Link>
-            <Link href="/signup">
-              <Button>Sign Up</Button>
-            </Link>
+            <Button className="bg-white text-purple-700 border-black font-semibold hover:bg-purple-200 transition duration-300">
+              <SignInButton mode="redirect" />
+            </Button>
+            <Button className="bg-white text-purple-700 border-black font-semibold hover:bg-purple-200 transition duration-300">
+              <SignUpButton mode="redirect" />
+            </Button>
           </div>
         </div>
       </header>
@@ -51,7 +52,7 @@ export default function Home() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Link href="/signup">
+                  <Link href="/dashboard">
                     <Button size="lg" className="gap-1">
                       Get Started <ArrowRight className="h-4 w-4" />
                     </Button>
@@ -65,7 +66,7 @@ export default function Home() {
               </div>
               <div className="flex items-center justify-center">
                 <Image
-                  src="/placeholder.svg?height=550&width=550"
+                  src="/logo.jpg"
                   width={550}
                   height={550}
                   alt="JobGenie Dashboard Preview"
@@ -120,7 +121,9 @@ export default function Home() {
               <Sparkles className="h-6 w-6 text-primary" />
               <span className="text-xl font-bold">JobGenie</span>
             </Link>
-            <p className="text-sm text-gray-500 dark:text-gray-400">© 2023 JobGenie. All rights reserved.</p>
+            <p className="text-sm text-muted-foreground">
+              © {new Date().getFullYear()} JobGenie. All rights reserved.
+            </p>
           </div>
           <nav className="flex gap-4 sm:gap-6">
             <Link href="/about" className="text-sm font-medium hover:underline">
