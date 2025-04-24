@@ -12,6 +12,7 @@ import {
 import { ChevronsUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useRouter } from 'next/router';
+import DashboardLayout from "@/components/layout/dashboard-layout"
 
 const FeedbackPage = () => {
     const [feedbackList, setFeedbackList] = useState([]);
@@ -41,6 +42,7 @@ const FeedbackPage = () => {
     };
 
     return (
+        <DashboardLayout>
         <div className="px-6 md:px-12 py-10 max-w-6xl mx-auto text-gray-100  min-h-screen">
             <div className="text-center mb-12">
                 <h2 className="text-5xl font-bold text-green-400 drop-shadow-lg">🎉 Congratulations!</h2>
@@ -115,6 +117,7 @@ const FeedbackPage = () => {
                 </Button>
             </div>
         </div>
+        </DashboardLayout>
     );
 };
 
