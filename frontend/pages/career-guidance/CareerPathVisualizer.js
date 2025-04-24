@@ -17,7 +17,7 @@ const CareerPathVisualizer = () => {
         setIsLoading(true);
         setError(null);
         try {
-            const response = await fetch('http://localhost:8000/api/career-path', {
+            const response = await fetch('http://localhost:8000/api/career-guidance/roadmap', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',

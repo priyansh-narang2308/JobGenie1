@@ -52,7 +52,7 @@ const CareerGuidance = () => {
 
         setLoading(true);
         try {
-            const res = await fetch("http://localhost:8000/api/career-guidance", {
+            const res = await fetch("http://localhost:8000/api/career-guidance/coach", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
