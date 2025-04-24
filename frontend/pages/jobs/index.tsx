@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Slider } from "@/components/ui/slider"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Search } from "lucide-react"
 import { useState } from "react"
@@ -25,7 +24,7 @@ interface Job {
 }
 
 export default function Jobs() {
-  const [matchThreshold, setMatchThreshold] = useState(70)
+  const [matchThreshold, setMatchThreshold] = useState(0)
   const [jobs, setJobs] = useState<Job[]>([])
   const [skills, setSkills] = useState<string[]>([])
   const [loading, setLoading] = useState(false)
@@ -97,7 +96,7 @@ export default function Jobs() {
   // Filter jobs based on match threshold
   const filteredJobs = jobs.filter((job) => {
     // Convert match score to percentage (assuming max score is 10)
-    const matchPercentage = (job.match_score / 10) * 100
+    const matchPercentage = Math.round((job.match_score / 10) * 50)
     return matchPercentage >= matchThreshold
   })
 
@@ -114,20 +113,7 @@ export default function Jobs() {
               <TabsTrigger value="matches">AI Matches</TabsTrigger>
               <TabsTrigger value="saved">Saved Jobs</TabsTrigger>
             </TabsList>
-            <div className="flex items-center gap-2">
-              <Label htmlFor="match-threshold" className="text-sm">
-                Match Score: {matchThreshold}%+
-              </Label>
-              <Slider
-                id="match-threshold"
-                min={0}
-                max={100}
-                step={5}
-                value={[matchThreshold]}
-                onValueChange={(value) => setMatchThreshold(value[0])}
-                className="w-[120px]"
-              />
-            </div>
+            
           </div>
           <TabsContent value="matches" className="space-y-4">
             <div className="flex flex-col md:flex-row gap-6">
@@ -187,7 +173,7 @@ export default function Jobs() {
                   <JobResults
                     skills={skills}
                     jobs={filteredJobs}
-                    message={`${searchMessage} (showing ${filteredJobs.length} jobs with ${matchThreshold}%+ match)`}
+                    message={searchMessage}
                   />
                 )}
               </div>
