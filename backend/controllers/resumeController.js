@@ -55,7 +55,7 @@ export const extractResumeSkills = async (req, res) => {
       You are an expert resume parser.
 
       INSTRUCTIONS:
-      1. Extract ONLY the skills explicitly mentioned by the candidate from the provided resume text. These can be technical skills or soft skills. DO NOT inlclude random skills.
+      1. Extract ONLY the skills explicitly mentioned by the candidate from the provided resume text. Include ONLY TECHNICAL skills and maximum of 1-2 soft skills. DO NOT inlclude random skills.
       2. If multiple related skills are mentioned together, such as "C/C++", treat them as individual skills if relevant (i.e., separate them into distinct skills like "C" and "C++").
       3. Return the extracted skills in STRICTLY in JSON format with the following structure:
       {
@@ -105,7 +105,135 @@ export const extractResumeSkills = async (req, res) => {
     res.status(500).json({ error: 'Server error while extracting skills from resume text' });
   }
 };
+
+export const extractJDSkills = async (req, res) => {
+  try {
+    const { text } = req.body;
+
+    if (!text) {
+      return res.status(400).json({ error: 'No job description text provided' });
+    }
+
+    const PROMPT = `
+      You are an expert Job Description parser.
+
+      INSTRUCTIONS:
+      1. Extract ONLY the skills explicitly mentioned by the employer in the provided job description text. Include ONLY TECHNICAL skills and maximum of 1-2 soft skills. DO NOT inlclude random skills.
+      2. If multiple related skills are mentioned together, such as "C/C++", treat them as individual skills if relevant (i.e., separate them into distinct skills like "C" and "C++").
+      3. Return the extracted skills in STRICTLY in JSON format with the following structure:
+      {
+        "Skills": ["Skill1", "Skill2", ..., "SkillN"]
+      }
+
+      Job Description:
+      """
+      ${text}
+      """
+    `;
+
+    let parsedResponse = null;
+    let attempts = 0;
+
+    while (attempts < 5) {
+      const geminiResponse = await geminiProcessor(PROMPT);
+
+      try {
+        let responseText = geminiResponse.trim();
+        let startIdx = responseText.indexOf('{');
+        let endIdx = responseText.lastIndexOf('}') + 1;
+
+        if (startIdx >= 0 && endIdx > startIdx) {
+          let jsonStr = responseText.slice(startIdx, endIdx);
+          parsedResponse = JSON.parse(jsonStr);
+          break;
+        } else {
+          throw new Error("Invalid JSON structure");
+        }
+      } catch (err) {
+        console.warn(`Attempt ${attempts + 1} failed to parse JSON:`, err.message);
+        attempts++;
+      }
+    }
+
+    if (!parsedResponse) {
+      return res.status(500).json({ error: 'Failed to parse skills after multiple attempts' });
+    }
+
+    return res.json({
+      skills: parsedResponse.Skills
+    });
+
+  } catch (error) {
+    console.error('Error in extractSkills:', error);
+    res.status(500).json({ error: 'Server error while extracting skills from JD text' });
+  }
+};
   
+export const compareSkillsMatch = async (req, res) => {
+  try {
+    const { jdSkills, resumeSkills } = req.body;
+
+    if (!jdSkills || !resumeSkills || !Array.isArray(jdSkills) || !Array.isArray(resumeSkills)) {
+      return res.status(400).json({ error: 'Invalid input. Expected jdSkills and resumeSkills as arrays.' });
+    }
+
+    const PROMPT = `
+      You are an expert at comparing job description skills with resume skills.
+
+      INSTRUCTIONS:
+      1. Compare the following two skill lists:
+         - JD Skills: ${JSON.stringify(jdSkills)}
+         - Resume Skills: ${JSON.stringify(resumeSkills)}
+      2. Identify which skills from the JD are present in the resume. Consider semantic matches as well (e.g., "React" and "React.js" are the same).
+      3. Return only skills from the JD list that are matched in any form with the resume list.
+      4. Also calculate the match percentage = (Number of Matched JD Skills / Total JD Skills) * 100
+
+      Return strictly in the following JSON format:
+      {
+        "MatchedSkills": ["Skill1", "Skill2", ...],
+        "MatchPercentage": 85
+      }
+    `;
+
+    let parsedResponse = null;
+    let attempts = 0;
+
+    while (attempts < 5) {
+      const geminiResponse = await geminiProcessor(PROMPT);
+
+      try {
+        let responseText = geminiResponse.trim();
+        let startIdx = responseText.indexOf('{');
+        let endIdx = responseText.lastIndexOf('}') + 1;
+
+        if (startIdx >= 0 && endIdx > startIdx) {
+          let jsonStr = responseText.slice(startIdx, endIdx);
+          parsedResponse = JSON.parse(jsonStr);
+          break;
+        } else {
+          throw new Error("Invalid JSON structure");
+        }
+      } catch (err) {
+        console.warn(`Attempt ${attempts + 1} failed to parse JSON:`, err.message);
+        attempts++;
+      }
+    }
+
+    if (!parsedResponse) {
+      return res.status(500).json({ error: 'Failed to parse skills comparison after multiple attempts' });
+    }
+
+    return res.json({
+      matchedSkills: parsedResponse.MatchedSkills,
+      matchPercentage: parsedResponse.MatchPercentage
+    });
+
+  } catch (error) {
+    console.error('Error in compareSkillsMatch:', error);
+    res.status(500).json({ error: 'Server error while comparing JD and resume skills' });
+  }
+};
+
 export const generateCoverLetter = async (req, res) => {
   const { resumeText, jobDescription, selfDescription } = req.body;
   
