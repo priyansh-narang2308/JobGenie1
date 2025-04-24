@@ -9,9 +9,9 @@ from services.career_guidance_service import (
     CAREER_PATH_PROMPT
 )
 
-router = APIRouter()
+router = APIRouter(prefix="/api/career-guidance", tags=["career-guidance"])
 
-@router.post("/career-chatbot")
+@router.post("/chatbot")
 async def career_chatbot(request: Request):
     try:
         body = await request.json()
@@ -45,7 +45,7 @@ async def career_chatbot(request: Request):
         return {"response": f"I'm having trouble processing your request. Error: {str(e)}", "error": str(e)}
 
 
-@router.post("/career-guidance")
+@router.post("/coach")
 async def career_guidance(request: Request):
     body = await request.json()
     user_query = body.get("query", "")
@@ -70,7 +70,7 @@ async def career_guidance(request: Request):
         return {"error": str(e)}
 
 
-@router.post("/career-path")
+@router.post("/roadmap")
 async def generate_career_path(request: Request):
     try:
         body = await request.json()
