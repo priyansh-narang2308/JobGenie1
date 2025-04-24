@@ -1,6 +1,8 @@
 from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 import os
 from fastapi import FastAPI
+from dotenv import load_dotenv
+import google.generativeai as genai
 from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
 import google.generativeai as genai
@@ -15,23 +17,24 @@ from routers.career_chatbot import router as career_chatbot_router
 # Load environment variables
 load_dotenv()
 
+load_dotenv()
+
 from routes import career_guidance_routes
+
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+FRONTEND_URL = os.getenv("FRONTEND_URL")
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],  # Frontend URL
+    allow_origins=[FRONTEND_URL],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Configure Gemini API
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-genai.configure(api_key=GEMINI_API_KEY)
-
-# Include routers
+# Include routerr
 app.include_router(career_guidance_router)
 app.include_router(career_path_router)
 app.include_router(career_chatbot_router)
@@ -43,4 +46,5 @@ async def root():
     return {"message": "Welcome to JobGenie API"}
 
 # Job search endpoints
-app.include_router(career_guidance_routes.router)
+genai.configure(api_key=GEMINI_API_KEY)
+
