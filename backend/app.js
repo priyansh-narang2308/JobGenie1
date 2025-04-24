@@ -2,6 +2,8 @@ import cors from 'cors';
 import dotenv from 'dotenv';
 import express from 'express';
 
+import resumeRoutes from './routes/resumeRoutes.js'; 
+
 dotenv.config();
 
 const app = express();
@@ -14,5 +16,7 @@ app.use((req, res, next) => {
     console.log(`[${now}] ${req.method} ${req.originalUrl}`);
     next();
 });
+
+app.use('/api/resume', resumeRoutes);
 
 export default app;
