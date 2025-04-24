@@ -1,0 +1,5 @@
+/node_modules
+.env
+*.pdf
+cover_letter.tex
+custom_resume.tex

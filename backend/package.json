@@ -1,0 +1,25 @@
+{
+  "name": "backend",
+  "version": "1.0.0",
+  "main": "app.js",
+  "type": "module",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "nodemon server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "dependencies": {
+    "@google/generative-ai": "^0.24.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
+    "node-latex": "^3.1.0",
+    "nodemon": "^3.1.10",
+    "pdf-parse": "^1.1.1",
+    "rss-parser": "^3.13.0"
+  }
+}
