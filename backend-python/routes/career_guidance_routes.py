@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Request
-from services import (
+from services.career_guidance_service import (
     detect_language, 
     translate_text, 
     generate_ai_response, 

@@ -1,14 +1,12 @@
-from fastapi import FastAPI, UploadFile, File, HTTPException, Form
 import os
-from fastapi.middleware.cors import CORSMiddleware
 from dotenv import load_dotenv
+from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 import google.generativeai as genai
-from routes.jobs import router as jobs_router
+from routes.jobs_routes import router as jobs_router
+from routes.career_guidance_routes import router as career_guidance_router
 
-# Load environment variables
 load_dotenv()
-
-from routes import career_guidance_routes
 
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 FRONTEND_URL = os.getenv("FRONTEND_URL")
@@ -23,15 +21,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routerr
-app.include_router(career_guidance_routes)
+app.include_router(career_guidance_router)
 app.include_router(jobs_router)
 
-# Root endpoint
 @app.get("/")
 async def root():
-    return {"message": "Welcome to JobGenie API"}
+    return {"message": "The JobGenie API Service is up and running!"}
 
-# Job search endpoints
 genai.configure(api_key=GEMINI_API_KEY)
 
