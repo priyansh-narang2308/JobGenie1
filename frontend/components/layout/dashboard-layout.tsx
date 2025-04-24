@@ -16,6 +16,7 @@ import {
   Settings,
   Sparkles,
   User,
+  Speech,
   X,
 } from "lucide-react"
 import Link from "next/link"
@@ -32,9 +33,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
   const navigation = [
     { name: "Dashboard", href: "/dashboard", icon: Gauge },
     { name: "Jobs", href: "/jobs", icon: BriefcaseBusiness },
-    { name: "Resume", href: "/resume", icon: FileText },
-    { name: "Cover Letters", href: "/cover-letter", icon: FileText },
-    { name: "Interviews", href: "/interviews", icon: MessageSquare },
+    { name: "Resume Tools", href: "/resume-tools", icon: FileText },
+    { name: "Interviews", href: "/interviews", icon: Speech },
     { name: "Career Guidance", href: "/career-guidance", icon: MessageSquare },
     { name: "Learning", href: "/learning", icon: GraduationCap },
     { name: "Profile", href: "/profile", icon: User },
