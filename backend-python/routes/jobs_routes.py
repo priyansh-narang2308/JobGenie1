@@ -34,7 +34,11 @@ async def search_jobs(
             )
         
         print("Fetching matching jobs...")
+<<<<<<< HEAD
         jobs = fetch_jobs_from_linkedin(position, location, jobType, skills)
+=======
+        jobs = fetch_jobs_from_linkedin(position, location, job_type, skills)
+>>>>>>> 27924e1 (Cleaned up python-backend and fixed all code conflicts)
         
         os.remove(temp_path)
         
