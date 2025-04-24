@@ -25,9 +25,9 @@ const InterviewLit = () => {
 
     return (
         <div className="px-6 py-8">
-<h2 className="font-bold text-3xl text-gray-900 dark:text-white mb-6">
-    📂 Your Previous Interviews
-</h2>
+            <h2 className="font-bold text-3xl text-gray-900 mb-6">
+                📂 Your Previous Interviews
+            </h2>
 
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
                 {interviewList && interviewList.length > 0 ? (
@@ -35,9 +35,9 @@ const InterviewLit = () => {
                         <InterviewItemCard interview={interview} key={index} />
                     ))
                 ) : (
-<p className="text-gray-500 dark:text-gray-400 text-md">
-    No interviews found.
-</p>
+                    <p className="text-gray-600 text-md">
+                        No interviews found.
+                    </p>
                 )}
             </div>
         </div>

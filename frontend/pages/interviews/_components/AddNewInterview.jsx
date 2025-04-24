@@ -69,33 +69,56 @@ const AddNewInterview = () => {
     return (
         <div>
             <div
-                className="p-6 border border-blue-800 bg-blue-900/50 hover:bg-blue-900 rounded-lg shadow-md text-white cursor-pointer transition-all"
+                className="p-6 border border-blue-300 bg-blue-100 hover:bg-blue-200 rounded-lg shadow text-blue-900 cursor-pointer transition-all"
                 onClick={() => setOpenDialog(true)}
             >
                 <h2 className="font-semibold text-lg text-center">+ Add New Interview</h2>
             </div>
 
             <Dialog open={openDialog} onOpenChange={setOpenDialog}>
-                <DialogContent className="max-w-2xl bg-slate-900 border border-blue-700 text-white">
+                <DialogContent className="max-w-2xl bg-white border border-gray-300 text-gray-900 shadow-lg">
                     <DialogHeader>
-                        <DialogTitle className="text-2xl font-bold mb-2">🎯 Describe Your Interview Role</DialogTitle>
-                        <DialogDescription className="text-blue-300">
-                            <form onSubmit={onSubmit} className="space-y-5">
+                        <DialogTitle className="text-2xl font-bold mb-2">
+                            🎯 Describe Your Interview Role
+                        </DialogTitle>
+                        <DialogDescription className="text-gray-600">
+                            <form onSubmit={onSubmit} className="space-y-5 mt-4">
                                 <div>
                                     <label className="block mb-1 font-medium">Job Role/Position</label>
-                                    <Input className="bg-slate-800 text-white" placeholder="e.g. Full Stack Developer" required onChange={(e) => setJobPosition(e.target.value)} />
+                                    <Input
+                                        className="bg-gray-50 text-gray-900 border border-gray-300"
+                                        placeholder="e.g. Full Stack Developer"
+                                        required
+                                        onChange={(e) => setJobPosition(e.target.value)}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block mb-1 font-medium">Job Description / Tech Stack</label>
-                                    <Textarea className="bg-slate-800 text-white" placeholder="e.g. React, NodeJS, etc." required onChange={(e) => setJobDescription(e.target.value)} />
+                                    <Textarea
+                                        className="bg-gray-50 text-gray-900 border border-gray-300"
+                                        placeholder="e.g. React, NodeJS, etc."
+                                        required
+                                        onChange={(e) => setJobDescription(e.target.value)}
+                                    />
                                 </div>
                                 <div>
                                     <label className="block mb-1 font-medium">Years of Experience</label>
-                                    <Input className="bg-slate-800 text-white" placeholder="e.g. 3" type="number" required onChange={(e) => setJobExperience(e.target.value)} />
+                                    <Input
+                                        className="bg-gray-50 text-gray-900 border border-gray-300"
+                                        placeholder="e.g. 3"
+                                        type="number"
+                                        required
+                                        onChange={(e) => setJobExperience(e.target.value)}
+                                    />
                                 </div>
 
                                 <div className="flex justify-end gap-4 mt-6">
-                                    <Button variant="outline" type="button" onClick={() => setOpenDialog(false)}>
+                                    <Button
+                                        variant="outline"
+                                        type="button"
+                                        onClick={() => setOpenDialog(false)}
+                                        className="border-gray-400"
+                                    >
                                         Cancel
                                     </Button>
                                     <Button type="submit" className="bg-green-600 hover:bg-green-700 text-white">
