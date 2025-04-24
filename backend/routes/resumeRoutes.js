@@ -5,6 +5,7 @@ import {
     extractResumeSkills, 
     extractJDSkills,
     compareSkillsMatch,
+    evaluateATSScore,
     customiseResume, 
     generateCoverLetter 
 } from '../controllers/resumeController.js';
@@ -16,6 +17,7 @@ router.post('/extract-text', upload.single('file'), extractResumeText);
 router.post('/extract-skills', extractResumeSkills);
 router.post('/extract-jd-skills', extractJDSkills);
 router.post('/match-skills', compareSkillsMatch);
+router.post('/eval-ats', evaluateATSScore);
 router.post('/customise', customiseResume);
 router.post('/generate-cover-letter', generateCoverLetter);
 
