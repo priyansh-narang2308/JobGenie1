@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "pages/interviews/interview/[interviewId]/index.jsx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "pages/interviews/interview/[interviewId]/index.jsx", "pages/index.jsx"],
   "exclude": ["node_modules"]
 }

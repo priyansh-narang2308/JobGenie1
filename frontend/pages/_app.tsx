@@ -12,7 +12,7 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <>
       <Head>
-        <title>JobGenie - AI Job Search Assistant</title>
+        <title>JobGenie</title>
         <meta name="description" content="AI-powered job search platform to find your perfect career match" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />

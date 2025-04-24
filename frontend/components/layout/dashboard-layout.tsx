@@ -13,6 +13,8 @@ import {
   Menu,
   Globe,
   MessageSquare,
+  PanelLeftClose,
+  PanelLeftOpen,
   Settings,
   Sparkles,
   User,
@@ -24,13 +26,14 @@ import {
 import Link from "next/link"
 import { cn } from "@/lib/utils"
 import GoogleTranslate from "../google-translate"
+import { useClerk, useUser } from "@clerk/nextjs"
 
 interface DashboardLayoutProps {
   children: ReactNode
 }
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
-  const [sidebarOpen, setSidebarOpen] = useState(false)
+  const [sidebarOpen, setSidebarOpen] = useState(true)
   const router = useRouter()
   const { theme, setTheme } = useTheme()
 
@@ -43,6 +46,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     { name: "Profile", href: "/profile", icon: User },
     { name: "Settings", href: "/settings", icon: Settings },
   ]
+
+  const toggleSidebar = () => {
+    setSidebarOpen(!sidebarOpen)
+  }
+  const { signOut } = useClerk()
+  const { user } = useUser()
+
 
   return (
     <div className="flex min-h-screen">
@@ -73,7 +83,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {theme === "dark" ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
               </button>
               <div className="flex h-9 w-9 items-center justify-center rounded-md border bg-background text-sm font-medium ring-offset-background transition-colors hover:bg-accent hover:text-accent-foreground">
-                  
+
                 <GoogleTranslate />
               </div>
             </div>

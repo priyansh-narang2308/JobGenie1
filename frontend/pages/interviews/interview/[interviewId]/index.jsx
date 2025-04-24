@@ -9,6 +9,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/router';  
 import React, { useEffect, useState } from 'react';
 import Webcam from 'react-webcam';
+import DashboardLayout from "@/components/layout/dashboard-layout"
+
 
 const InterviewPage = () => {
     const router = useRouter();
@@ -31,6 +33,7 @@ const InterviewPage = () => {
     };
 
     return (
+        <DashboardLayout>
         <div className="container mx-auto px-4 py-10">
             <h1 className="text-3xl font-bold text-center mb-10">Let's Get Started</h1>
 
@@ -111,6 +114,7 @@ const InterviewPage = () => {
                 </div>
             </div>
         </div>
+        </DashboardLayout>
     );
 };
 

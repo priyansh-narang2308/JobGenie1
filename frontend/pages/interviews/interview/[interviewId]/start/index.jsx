@@ -9,6 +9,7 @@ import RecordAnswer from './_components/RecordAnswer';
 import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
+import DashboardLayout from "@/components/layout/dashboard-layout"
 
 const StartPage = () => {
     const router = useRouter();
@@ -35,6 +36,7 @@ const StartPage = () => {
     };
 
     return (
+      <DashboardLayout>
         <div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                 <Questions
@@ -75,6 +77,7 @@ const StartPage = () => {
 </div>
 
         </div>
+      </DashboardLayout>
     );
 };
 
