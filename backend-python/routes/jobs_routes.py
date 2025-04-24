@@ -35,10 +35,14 @@ async def search_jobs(
         
         print("Fetching matching jobs...")
 <<<<<<< HEAD
+<<<<<<< HEAD
         jobs = fetch_jobs_from_linkedin(position, location, jobType, skills)
 =======
         jobs = fetch_jobs_from_linkedin(position, location, job_type, skills)
 >>>>>>> 27924e1 (Cleaned up python-backend and fixed all code conflicts)
+=======
+        jobs = fetch_jobs_from_linkedin(position, location, jobType, skills)
+>>>>>>> 040f7d3 (Added alias for Job Type in job_routes.py)
         
         os.remove(temp_path)
         
