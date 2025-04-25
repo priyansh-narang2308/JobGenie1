@@ -143,4 +143,4 @@ MIT License. Feel free to fork, improve, and build upon JobGenie.
 
 ---
 
-> 🔗 _Made with ♥ the Team H**HARD COMMTI** for jobseekers and dream chasers._
+> 🔗 _Made with ♥ the Team **HARD COMMIT** for jobseekers and dream chasers._
